@@ -12,7 +12,8 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 
 import Router from './router';
-import { WELLKNOWN_URL, APP_URL, JOURNEY_LOGIN, WEB_OAUTH_CLIENT } from './constants';
+import { Config } from '@forgerock/javascript-sdk';
+import { AM_URL, APP_URL, JOURNEY_LOGIN, WEB_OAUTH_CLIENT, REALM_PATH } from './constants';
 import { AppContext, useGlobalStateMgmt } from './global-state';
 
 /**
@@ -20,6 +21,18 @@ import { AppContext, useGlobalStateMgmt } from './global-state';
  * Webpack will detect this and transpile, process and generate the needed CSS file
  */
 import './styles/index.scss';
+
+Config.set({
+  clientId: WEB_OAUTH_CLIENT,
+  redirectUri: `${APP_URL}/callback`,
+  scope: 'openid profile email address',
+  serverConfig: {
+    baseUrl: AM_URL,
+    timeout: 5000,
+  },
+  realmPath: REALM_PATH,
+  tree: JOURNEY_LOGIN,
+});
 
 /**
  * Initialize the React application
