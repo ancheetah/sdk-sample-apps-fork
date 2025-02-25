@@ -8,7 +8,9 @@
  * of the MIT license. See the LICENSE file for details.
  */
 import { FRAuth, TokenManager, UserManager } from '@forgerock/javascript-sdk';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AppContext } from '../../global-state';
 
 import Loading from '../utilities/loading';
 import Alert from './alert';
@@ -36,6 +38,8 @@ function mapCallbacksToComponents(cb, idx) {
 export default function Form() {
   const [step, setStep] = useState(null);
   const [isAuthenticated, setAuthentication] = useState(false);
+  const [_, methods] = useContext(AppContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function getStep() {
@@ -57,6 +61,12 @@ export default function Form() {
         console.log('tokens', tokens);
         const user = await UserManager.getCurrentUser();
         console.log('user', user);
+
+        methods.setUser(user.name);
+        methods.setEmail(user.email);
+        methods.setAuthentication(true);
+
+        navigate('/');
       } catch (err) {
         console.error(`Error: token request; ${err}`);
       }
