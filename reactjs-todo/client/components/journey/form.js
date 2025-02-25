@@ -55,7 +55,22 @@ export default function Form() {
     return <Loading message="Checking your session ..." />;
   } else if (step.type === 'Step') {
     return (
-      <form className="cstm_form">
+      <form
+        className="cstm_form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          async function getStep() {
+            try {
+              const nextStep = await FRAuth.next(step);
+              console.log(nextStep);
+              setStep(nextStep);
+            } catch (err) {
+              console.error(`Error: form submission; ${err}`);
+            }
+          }
+          getStep();
+        }}
+      >
         {step.callbacks.map(mapCallbacksToComponents)}
         <button className="btn btn-primary w-100" type="submit">
           Sign In
