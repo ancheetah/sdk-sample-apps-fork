@@ -7,7 +7,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
  */
-import { FRAuth } from '@forgerock/javascript-sdk';
+import { FRAuth, TokenManager } from '@forgerock/javascript-sdk';
 import React, { useEffect, useState } from 'react';
 
 import Loading from '../utilities/loading';
@@ -35,6 +35,7 @@ function mapCallbacksToComponents(cb, idx) {
  */
 export default function Form() {
   const [step, setStep] = useState(null);
+  const [isAuthenticated, setAuthentication] = useState(false);
 
   useEffect(() => {
     async function getStep() {
@@ -48,6 +49,20 @@ export default function Form() {
     }
     getStep();
   }, []);
+
+  useEffect(() => {
+    async function oauthFlow() {
+      try {
+        const tokens = await TokenManager.getTokens();
+        console.log('tokens', tokens);
+      } catch (err) {
+        console.error(`Error: token request; ${err}`);
+      }
+    }
+    if (isAuthenticated) {
+      oauthFlow();
+    }
+  }, [isAuthenticated]);
 
   console.log('step', step);
 
@@ -66,7 +81,10 @@ export default function Form() {
           async function getStep() {
             try {
               const nextStep = await FRAuth.next(step);
-              console.log(nextStep);
+              if (nextStep.type === 'LoginSuccess') {
+                setAuthentication(true);
+              }
+              console.log('nextStep', nextStep);
               setStep(nextStep);
             } catch (err) {
               console.error(`Error: form submission; ${err}`);

@@ -24,7 +24,7 @@ import './styles/index.scss';
 
 Config.set({
   clientId: WEB_OAUTH_CLIENT,
-  redirectUri: `${APP_URL}/callback`,
+  redirectUri: `${window.location.origin}/callback`,
   scope: 'openid profile email address',
   serverConfig: {
     baseUrl: AM_URL,
