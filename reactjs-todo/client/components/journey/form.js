@@ -53,6 +53,8 @@ export default function Form() {
 
   if (!step) {
     return <Loading message="Checking your session ..." />;
+  } else if (step.type === 'LoginSuccess') {
+    return <Alert message="Success! You're logged in." type="success" />;
   } else if (step.type === 'Step') {
     return (
       <form
