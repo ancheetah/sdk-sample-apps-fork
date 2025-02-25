@@ -12,8 +12,8 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 
 import Router from './router';
-import { Config } from '@forgerock/javascript-sdk';
-import { AM_URL, APP_URL, JOURNEY_LOGIN, WEB_OAUTH_CLIENT, REALM_PATH } from './constants';
+import { Config, TokenStorage } from '@forgerock/javascript-sdk';
+import { AM_URL, JOURNEY_LOGIN, WEB_OAUTH_CLIENT, REALM_PATH } from './constants';
 import { AppContext, useGlobalStateMgmt } from './global-state';
 
 /**
@@ -41,6 +41,14 @@ Config.set({
  */
 (async function initAndHydrate() {
   let isAuthenticated;
+
+  try {
+    isAuthenticated = !!(await TokenStorage.get());
+    console.log(`isAuthenticated: ${isAuthenticated}`);
+  } catch (error) {
+    console.error(`Error checking authentication status: ${error}`);
+  }
+
   const prefersDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
   const email = window.sessionStorage.getItem('sdk_email');
   const username = window.sessionStorage.getItem('sdk_username');
@@ -66,6 +74,7 @@ Config.set({
      */
     const stateMgmt = useGlobalStateMgmt({
       email,
+      isAuthenticated,
       prefersDarkTheme,
       username,
     });
