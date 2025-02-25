@@ -7,7 +7,7 @@
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
  */
-import { FRAuth, TokenManager } from '@forgerock/javascript-sdk';
+import { FRAuth, TokenManager, UserManager } from '@forgerock/javascript-sdk';
 import React, { useEffect, useState } from 'react';
 
 import Loading from '../utilities/loading';
@@ -55,6 +55,8 @@ export default function Form() {
       try {
         const tokens = await TokenManager.getTokens();
         console.log('tokens', tokens);
+        const user = await UserManager.getCurrentUser();
+        console.log('user', user);
       } catch (err) {
         console.error(`Error: token request; ${err}`);
       }
