@@ -21,7 +21,7 @@ import { AppContext } from '../global-state';
  * @param {function} setAuth - global state method for setting user authentication status
  * @returns {Array}
  */
-function useAuthValidation(auth, setAuth) {
+export function useAuthValidation(auth, setAuth) {
   /**
    * React state "hook"
    *
