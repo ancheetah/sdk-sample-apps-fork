@@ -12,7 +12,8 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 
 import Router from './router';
-import { WELLKNOWN_URL, APP_URL, JOURNEY_LOGIN, WEB_OAUTH_CLIENT } from './constants';
+import { Config, TokenStorage } from '@forgerock/javascript-sdk';
+import { AM_URL, JOURNEY_LOGIN, WEB_OAUTH_CLIENT, REALM_PATH } from './constants';
 import { AppContext, useGlobalStateMgmt } from './global-state';
 
 /**
@@ -21,6 +22,18 @@ import { AppContext, useGlobalStateMgmt } from './global-state';
  */
 import './styles/index.scss';
 
+Config.set({
+  clientId: WEB_OAUTH_CLIENT,
+  redirectUri: `${window.location.origin}/callback`,
+  scope: 'openid profile email address',
+  serverConfig: {
+    baseUrl: AM_URL,
+    timeout: 5000,
+  },
+  realmPath: REALM_PATH,
+  tree: JOURNEY_LOGIN,
+});
+
 /**
  * Initialize the React application
  * This is an IIFE (Immediately Invoked Function Expression),
@@ -28,6 +41,14 @@ import './styles/index.scss';
  */
 (async function initAndHydrate() {
   let isAuthenticated;
+
+  try {
+    isAuthenticated = !!(await TokenStorage.get());
+    console.log(`isAuthenticated: ${isAuthenticated}`);
+  } catch (error) {
+    console.error(`Error checking authentication status: ${error}`);
+  }
+
   const prefersDarkTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
   const email = window.sessionStorage.getItem('sdk_email');
   const username = window.sessionStorage.getItem('sdk_username');
@@ -53,6 +74,7 @@ import './styles/index.scss';
      */
     const stateMgmt = useGlobalStateMgmt({
       email,
+      isAuthenticated,
       prefersDarkTheme,
       username,
     });

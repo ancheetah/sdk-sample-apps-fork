@@ -10,7 +10,7 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { TokenStorage } from '@forgerock/javascript-sdk';
+import { UserManager } from '@forgerock/javascript-sdk';
 
 import Loading from '../components/utilities/loading';
 import { AppContext } from '../global-state';
@@ -21,7 +21,7 @@ import { AppContext } from '../global-state';
  * @param {function} setAuth - global state method for setting user authentication status
  * @returns {Array}
  */
-function useAuthValidation(auth, setAuth) {
+export function useAuthValidation(auth, setAuth) {
   /**
    * React state "hook"
    *
@@ -39,7 +39,7 @@ function useAuthValidation(auth, setAuth) {
          * If we they have been authenticated, validate that assumption
          */
         try {
-          await TokenStorage.get();
+          await UserManager.getCurrentUser();
           setValid('valid');
         } catch (err) {
           console.info(`Info: route validation; ${err}`);
@@ -81,6 +81,7 @@ export function ProtectedRoute({ children }) {
   const [{ isAuthenticated }, { setAuthentication }] = useContext(AppContext);
   // Custom hook for validating user's access token
   const [{ isValid }] = useAuthValidation(isAuthenticated, setAuthentication);
+  console.log('isValid', isValid, 'isAuthenticated', isAuthenticated);
 
   switch (isValid) {
     case 'valid':

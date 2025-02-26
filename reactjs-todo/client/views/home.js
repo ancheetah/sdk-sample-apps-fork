@@ -10,6 +10,7 @@
 
 import React, { Fragment, useContext } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuthValidation } from '../utilities/route';
 
 import { AppContext } from '../global-state';
 import VerifiedIcon from '../components/icons/verified-icon';
@@ -26,6 +27,8 @@ export default function Home() {
    * and index 1 having the "setter" method to set new state values.
    */
   const [state] = useContext(AppContext);
+  const [{ isValid }] = useAuthValidation(state.isAuthenticated, state.setAuth);
+  console.log('state', state, 'isValid', isValid);
 
   const createAccountText = !state.isAuthenticated ? (
     <Fragment>
@@ -36,18 +39,19 @@ export default function Home() {
     </Fragment>
   ) : null;
 
-  const LoginAlert = state.isAuthenticated ? (
-    <p className="alert alert-success d-flex align-items-center mt-5" role="alert">
-      <VerifiedIcon classes="cstm_verified-alert-icon" size="36px" />
-      <span className="ps-2">
-        Welcome back, {state.username}!{' '}
-        <Link className="cstm_verified-alert-link" to="/todos">
-          Manage your todos here
-        </Link>
-        .
-      </span>
-    </p>
-  ) : null;
+  const LoginAlert =
+    isValid === 'valid' ? (
+      <p className="alert alert-success d-flex align-items-center mt-5" role="alert">
+        <VerifiedIcon classes="cstm_verified-alert-icon" size="36px" />
+        <span className="ps-2">
+          Welcome back, {state.username}!{' '}
+          <Link className="cstm_verified-alert-link" to="/todos">
+            Manage your todos here
+          </Link>
+          .
+        </span>
+      </p>
+    ) : null;
 
   return (
     <div className={`cstm_container container-fluid ${state.theme.textClass}`}>

@@ -7,15 +7,111 @@
  * This software may be modified and distributed under the terms
  * of the MIT license. See the LICENSE file for details.
  */
-
-import React from 'react';
+import { FRAuth, TokenManager, UserManager } from '@forgerock/javascript-sdk';
+import React, { useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AppContext } from '../../global-state';
 
 import Loading from '../utilities/loading';
+import Alert from './alert';
+import Password from './password';
+import Text from './text';
+import Unknown from './unknown';
+
+function mapCallbacksToComponents(cb, idx) {
+  const name = cb?.payload?.input?.[0].name;
+  switch (cb.getType()) {
+    case 'NameCallback':
+      return <Text callback={cb} inputName={name} key="username" />;
+    case 'PasswordCallback':
+      return <Password callback={cb} inputName={name} key="password" />;
+    default:
+      // If current callback is not supported, render a warning message
+      return <Unknown callback={cb} key={`unknown-${idx}`} />;
+  }
+}
 
 /**
  * @function Form - React component for managing the user authentication journey
  * @returns {Object} - React component object
  */
 export default function Form() {
-  return <Loading message="Checking your session ..." />;
+  const [step, setStep] = useState(null);
+  const [isAuthenticated, setAuthentication] = useState(false);
+  const [_, methods] = useContext(AppContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    async function getStep() {
+      try {
+        const initialStep = await FRAuth.start();
+        console.log('initialStep', initialStep);
+        setStep(initialStep);
+      } catch (error) {
+        console.error(`Error starting journey: ${error}`);
+      }
+    }
+    getStep();
+  }, []);
+
+  useEffect(() => {
+    async function oauthFlow() {
+      try {
+        const tokens = await TokenManager.getTokens();
+        console.log('tokens', tokens);
+        const user = await UserManager.getCurrentUser();
+        console.log('user', user);
+
+        methods.setUser(user.name);
+        methods.setEmail(user.email);
+        methods.setAuthentication(true);
+
+        navigate('/');
+      } catch (err) {
+        console.error(`Error: token request; ${err}`);
+      }
+    }
+    if (isAuthenticated) {
+      oauthFlow();
+    }
+  }, [isAuthenticated]);
+
+  console.log('step', step);
+
+  if (!step) {
+    return <Loading message="Checking your session ..." />;
+  } else if (step.type === 'LoginSuccess') {
+    return <Alert message="Success! You're logged in." type="success" />;
+  } else if (step.type === 'LoginFailure') {
+    return <Alert message="Login failed." type="error" />;
+  } else if (step.type === 'Step') {
+    return (
+      <form
+        className="cstm_form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          async function getStep() {
+            try {
+              const nextStep = await FRAuth.next(step);
+              if (nextStep.type === 'LoginSuccess') {
+                setAuthentication(true);
+              }
+              console.log('nextStep', nextStep);
+              setStep(nextStep);
+            } catch (err) {
+              console.error(`Error: form submission; ${err}`);
+            }
+          }
+          getStep();
+        }}
+      >
+        {step.callbacks.map(mapCallbacksToComponents)}
+        <button className="btn btn-primary w-100" type="submit">
+          Sign In
+        </button>
+      </form>
+    );
+  } else {
+    return <Alert message={step.message} />;
+  }
 }

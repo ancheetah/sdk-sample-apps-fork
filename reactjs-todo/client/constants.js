@@ -17,3 +17,5 @@ export const JOURNEY_LOGIN = process.env.JOURNEY_LOGIN;
 export const JOURNEY_REGISTER = process.env.JOURNEY_REGISTER;
 export const WEB_OAUTH_CLIENT = process.env.WEB_OAUTH_CLIENT;
 export const WELLKNOWN_URL = process.env.WELLKNOWN_URL;
+export const AM_URL = process.env.AM_URL;
+export const REALM_PATH = process.env.REALM_PATH;

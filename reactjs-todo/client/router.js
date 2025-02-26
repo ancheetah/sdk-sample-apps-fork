@@ -19,6 +19,7 @@ import Login from './views/login';
 import Logout from './views/logout';
 import Register from './views/register';
 import Todos from './views/todos';
+import { ProtectedRoute } from './utilities/route';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -43,11 +44,11 @@ export default function Router() {
         <Route
           path="todos"
           element={
-            <>
+            <ProtectedRoute>
               <Header />
               <Todos />
               <Footer />
-            </>
+            </ProtectedRoute>
           }
         />
         <Route path="logout" element={<Logout />} />
